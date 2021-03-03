@@ -11,6 +11,7 @@ local app = App(client)
 
 assets = {
     quit = ui.Asset.File("images/quit.png"),
+    checkmark = ui.Asset.File("images/checkmark.png"),
 }
 app.assetManager:add(assets)
 
@@ -32,7 +33,7 @@ function TodosView:_init(bounds)
         self:showNewTodoPopup(hand)
     end
     
-    self.tasks = {}
+    self.todoViews = {}
 
     self:layout()
 end
@@ -70,12 +71,54 @@ function TodosView:showNewTodoPopup(hand)
 end
 
 function TodosView:addTodo(text)
+    local todoView = ui.View(ui.Bounds{size=ui.Size(self.bounds.size.width*0.8,0.1,0.05)})
+    
+    local checkButton = todoView:addSubview(ui.Button(ui.Bounds{size=ui.Size(0.1, 0.1, 0.05)}))
+    checkButton.bounds:move(-self.bounds.size.width/2 + checkButton.bounds.size.width, 0, 0)
+    checkButton:setDefaultTexture(assets.checkmark)
+    checkButton.onActivated = function()
+        self:removeTodo(todoView)
+    end
 
+    local label = todoView:addSubview(ui.Label{
+        bounds= todoView.bounds:copy():inset(0.1, 0.05, 0):move(0.05, 0,0),
+        color= {0,0,0, 1},
+        halign= "left",
+        text= text
+    })
+
+    table.insert(self.todoViews, todoView)
+    self:layout()
+    self:addSubview(todoView)
+end
+
+function TodosView:removeTodo(todoView)
+    local index = tablex.find(self.todoViews, todoView)
+    table.remove(self.todoViews, index)
+    todoView:removeFromSuperview()
+    self:layout()
 end
 
 function TodosView:layout()
-    self.quitButton.bounds:moveToOrigin():move( 0.52,0.25,0.025)
-    self.addButton.bounds:moveToOrigin():move( 0, -0.15,0.025)
+    local height = #self.todoViews * 0.13 + 0.25
+
+    local pen = ui.Bounds{
+        size=self.addButton.bounds.size:copy(),
+        pose=ui.Pose(0, -height/2, self.addButton.bounds.size.depth/2)
+    }
+    pen:move(0, 0.07, 0)
+    self.addButton:setBounds(pen:copy())
+    pen:move(0, 0.15, 0)
+    for i, v in ipairs(self.todoViews) do
+        v:setBounds(pen:copy())
+        pen:move(0, 0.13, 0)
+    end
+
+    self.quitButton.bounds:moveToOrigin():move( 0.52, height/2, 0.025)
+    self.quitButton:setBounds()
+
+    self.bounds.size.height = height
+    self:setBounds()
 end
 
 app.mainView = TodosView(ui.Bounds(0, 1.2, -2,   1, 0.5, 0.01))
