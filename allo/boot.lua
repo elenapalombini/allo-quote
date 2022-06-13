@@ -1,6 +1,7 @@
 local projHome = arg[1]
 local url = arg[2]
 local srcDir = projHome.."/lua"
+local alloDir = projHome.."/allo"
 local depsDir = projHome.."/allo/deps"
 local libDir = projHome.."/allo/lib"
 
@@ -29,6 +30,7 @@ end
 
 package.path = package.path
     ..";"..srcDir.."/?.lua"
+    ..";"..alloDir.."/?.lua"
     ..";"..depsDir.."/alloui/lua/?.lua"
     ..";"..depsDir.."/alloui/lib/cpml/?.lua"
     ..";"..depsDir.."/alloui/lib/pl/lua/?.lua"
@@ -59,18 +61,34 @@ tablex = require('pl.tablex')
 pretty = require('pl.pretty')
 vec3 = require("modules.vec3")
 mat4 = require("modules.mat4")
+local json = require("json")
 
+ui.App.launchArguments = {}
 ui.App.initialLocation = nil
 ui.VideoSurface.libavAvailable = libav_available
 if arg[3] then
-    local ms = {string.match(arg[3], "([-+\\.%d]+), ([-+\\.%d]+), ([-+\\.%d]+), ([-+\\.%d]+), ([-+\\.%d]+), ([-+\\.%d]+), ([-+\\.%d]+), ([-+\\.%d]+), ([-+\\.%d]+), ([-+\\.%d]+), ([-+\\.%d]+), ([-+\\.%d]+), ([-+\\.%d]+), ([-+\\.%d]+), ([-+\\.%d]+), ([-+\\.%d]+)")}
-    local x, y, z = string.match(arg[3], "([-+\\.%d]+),([-+\\.%d]+),([-+\\.%d]+)")
-    if #ms == 16 then
-        local mn = tablex.map(function(s) return tonumber(s) end, ms)
-        local m = mat4(mn)
-        ui.App.initialLocation = m
-    elseif z then
-        ui.App.initialLocation = mat4.translate(mat4(), mat4(), vec3(tonumber(x), tonumber(y), tonumber(z)))
+    -- TODO: remove support for ui.App.initialLocation and non-JSON arg[3] payloads
+    -- to clean up this mess after, say... september 2022.
+    print("parsing", arg[3])
+    local status, launchArgs = pcall(json.decode, arg[3])
+    if status then
+        ui.App.launchArguments = launchArgs
+        if launchArgs.initialLocation then
+            ui.App.initialLocation = mat4(launchArgs.initialLocation)
+        end
+    else 
+        local ms = {string.match(arg[3], "([-+\\.%d]+), ([-+\\.%d]+), ([-+\\.%d]+), ([-+\\.%d]+), ([-+\\.%d]+), ([-+\\.%d]+), ([-+\\.%d]+), ([-+\\.%d]+), ([-+\\.%d]+), ([-+\\.%d]+), ([-+\\.%d]+), ([-+\\.%d]+), ([-+\\.%d]+), ([-+\\.%d]+), ([-+\\.%d]+), ([-+\\.%d]+)")}
+        local x, y, z = string.match(arg[3], "([-+\\.%d]+),([-+\\.%d]+),([-+\\.%d]+)")
+        if #ms == 16 then
+            local mn = tablex.map(function(s) return tonumber(s) end, ms)
+            local m = mat4(mn)
+            ui.App.initialLocation = m
+        elseif z then
+            ui.App.initialLocation = mat4.translate(mat4(), mat4(), vec3(tonumber(x), tonumber(y), tonumber(z)))
+        end
+        if ui.App.initialLocation then
+            ui.App.launchArguments.initialLocation = {ui.App.initialLocation:unpack()}
+        end
     end
 end
 
