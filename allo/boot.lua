@@ -63,32 +63,16 @@ vec3 = require("modules.vec3")
 mat4 = require("modules.mat4")
 local json = require("json")
 
+ui.VideoSurface.libavAvailable = libav_available
+
 ui.App.launchArguments = {}
 ui.App.initialLocation = nil
-ui.VideoSurface.libavAvailable = libav_available
-if arg[3] then
-    -- TODO: remove support for ui.App.initialLocation and non-JSON arg[3] payloads
-    -- to clean up this mess after, say... september 2022.
-    print("parsing", arg[3])
-    local status, launchArgs = pcall(json.decode, arg[3])
-    if status then
-        ui.App.launchArguments = launchArgs
-        if launchArgs.initialLocation then
-            ui.App.initialLocation = mat4(launchArgs.initialLocation)
-        end
-    else 
-        local ms = {string.match(arg[3], "([-+\\.%d]+), ([-+\\.%d]+), ([-+\\.%d]+), ([-+\\.%d]+), ([-+\\.%d]+), ([-+\\.%d]+), ([-+\\.%d]+), ([-+\\.%d]+), ([-+\\.%d]+), ([-+\\.%d]+), ([-+\\.%d]+), ([-+\\.%d]+), ([-+\\.%d]+), ([-+\\.%d]+), ([-+\\.%d]+), ([-+\\.%d]+)")}
-        local x, y, z = string.match(arg[3], "([-+\\.%d]+),([-+\\.%d]+),([-+\\.%d]+)")
-        if #ms == 16 then
-            local mn = tablex.map(function(s) return tonumber(s) end, ms)
-            local m = mat4(mn)
-            ui.App.initialLocation = m
-        elseif z then
-            ui.App.initialLocation = mat4.translate(mat4(), mat4(), vec3(tonumber(x), tonumber(y), tonumber(z)))
-        end
-        if ui.App.initialLocation then
-            ui.App.launchArguments.initialLocation = {ui.App.initialLocation:unpack()}
-        end
+local launchArgss = os.getenv("ALLO_APP_BOOT_ARGS")
+local status, launchArgs = pcall(json.decode, launchArgss)
+if status then
+    ui.App.launchArguments = launchArgs
+    if launchArgs.initialLocation then
+        ui.App.initialLocation = mat4(launchArgs.initialLocation)
     end
 end
 
