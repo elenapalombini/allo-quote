@@ -27,7 +27,7 @@ function TodosView:_init(bounds)
         app:quit()
     end
 
-    self.addButton = self:addSubview(ui.Button(ui.Bounds{size=ui.Size(bounds.size.width*0.8,0.1,0.05)}))
+    self.addButton = self:addSubview(ui.Button.Mesh(ui.Bounds{size=ui.Size(bounds.size.width*0.8,0.1,0.05)}))
     self.addButton.label:setText("Add todo")
     self.addButton.onActivated = function(hand)
         self:showNewTodoPopup(hand)
