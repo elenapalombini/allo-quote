@@ -54,12 +54,13 @@ function TodosView:showNewTodoPopup(hand)
     end
     input:askToFocus(hand)
 
-    local addButton = popup:addSubview(ui.Button(ui.Bounds{size=ui.Size(popup.bounds.size.width*0.8,0.1,0.05)}))
+    local addButton = popup:addSubview(ui.Button.Mesh(ui.Bounds{size=ui.Size(popup.bounds.size.width*0.8,0.1,0.05)}))
     addButton.bounds:move(0, 0, 0.025)
     addButton.label:setText("Add")
     addButton.onActivated = done
 
-    local cancelButton = popup:addSubview(ui.Button(ui.Bounds{size=ui.Size(popup.bounds.size.width*0.8,0.1,0.05)}))
+    local cancelButton = popup:addSubview(ui.Button.Mesh(ui.Bounds{size=ui.Size(popup.bounds.size.width*0.8,0.1,0.05)}))
+    cancelButton:setSecondary(true)
     cancelButton:setColor({0.4, 0.4, 0.3, 1.0})
     cancelButton.bounds:move(0, -0.15, 0.025)
     cancelButton.label:setText("Cancel")
