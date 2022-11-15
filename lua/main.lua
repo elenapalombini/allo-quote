@@ -16,9 +16,12 @@ assets = {
 app.assetManager:add(assets)
 
 
-class.TodosView(ui.Surface)
+class.TodosView(ui.View)
 function TodosView:_init(bounds)
     self:super(bounds)
+
+    self.backing = self:addSubview(ui.ModelView.BackingPlate())
+
     self.grabbable = true
 
     self.quitButton = self:addSubview(ui.Button(ui.Bounds{size=ui.Size(0.12,0.12,0.05)}))
@@ -27,7 +30,7 @@ function TodosView:_init(bounds)
         app:quit()
     end
 
-    self.addButton = self:addSubview(ui.Button.Mesh(ui.Bounds{size=ui.Size(bounds.size.width*0.8,0.1,0.05)}))
+    self.addButton = self:addSubview(ui.Button.Mesh(ui.Bounds{size=ui.Size(bounds.size.width*0.8,0.15,0.05)}:move(0,0,0.40)))
     self.addButton.label:setText("Add todo")
     self.addButton.onActivated = function(hand)
         self:showNewTodoPopup(hand)
