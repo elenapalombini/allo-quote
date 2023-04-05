@@ -122,6 +122,8 @@ function TodosView:layout()
     self.quitButton:setBounds()
 
     self.bounds.size.height = height
+    self.backing.bounds.size = self.bounds.size:copy()
+    self.backing:layout()
     self:setBounds()
 end
 
